@@ -4,6 +4,7 @@ from flask_graphql import GraphQLView
 from graphene import Schema
 
 from data_base.db_connaction import db_session, init_db, connection_url
+from gql.mutation import Mutation
 from gql.query import Query
 from models.cities import CityModel
 from models.contries import CountryModel
@@ -18,7 +19,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 #     init_db()
 
 
-schema = Schema(query=Query)
+schema = Schema(query=Query, mutation=Mutation)
 app.add_url_rule(
     '/graphql',
     view_func=GraphQLView.as_view(
