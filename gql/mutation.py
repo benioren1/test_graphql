@@ -49,7 +49,7 @@ class AddTarget(Mutation):
         target_type_id = Int()
         target_priority = Int()
     success = Boolean()
-    mission_id = Field(TargetType)
+    mission = Field(TargetType)
 
     @staticmethod
     def mutate(root, info,target_id,mission_id,target_industry,city_id,target_type_id,target_priority ):
@@ -61,7 +61,50 @@ class AddTarget(Mutation):
             session.commit()
             session.refresh(inserted_Target)
             return AddMission(success=True, mission=inserted_Target)
+class UpdateMission(Mutation):
+    class Arguments:
+        id = Int(required=True)
+        aircraft_lost = Float()
+        aircraft_damaged = Float()
+        aircraft_failed = Float()
+        aircraft_returned = Float()
+
+    success = Boolean()
+    mission = Field(MissionType)
+
+    @staticmethod
+    def mutate(root, info,id, aircraft_lost, aircraft_damaged, aircraft_failed,aircraft_returned):
+        with db_session() as session:
+            updated_mission = session.query(MissionModel).get(id)
+            updated_mission.aircraft_lost = aircraft_lost
+            updated_mission.aircraft_damaged = aircraft_damaged
+            updated_mission.aircraft_failed = aircraft_failed
+            updated_mission.aircraft_returned = aircraft_returned
+
+            session.commit()
+            session.refresh(updated_mission)
+            return UpdateMission(success=True, mission=updated_mission)
+
+class DeleteMission(Mutation):
+    class Arguments:
+        user_id =Int(required=True)
+
+    success =Boolean()
+
+    def mutate(self, info, user_id):
+        user = db_session.query(MissionModel).get(user_id)
+        if not user:
+            return DeleteMission(success=False)
+        db_session.delete(user)
+        db_session.commit()
+        return DeleteMission(success=True)
+
+
+
+
 
 class Mutation(ObjectType):
     add_mission = AddMission.Field()
     add_target = AddTarget.Field()
+    update_mission = UpdateMission.Field()
+    delete_mission = DeleteMission.Field()
